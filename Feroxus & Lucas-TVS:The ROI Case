@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feroxus & Lucas-TVS: The ROI Case</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- New: three.js library for a real 3D product visualization -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Updated Palette: Slightly more vibrant, professional warm neutrals with deep teal accents -->
+    <!-- Application Structure Plan: The application is now structured as a top-down, ROI-driven pitch. It starts with a bold statement on value, moves to the costs of inaction, presents solutions framed as direct financial benefits, quantifies the total impact with a key visualization, and concludes with a plan for a low-risk pilot. This structure is designed to quickly capture leadership's attention by focusing on business outcomes and minimizing technical jargon. Each section builds on the last, from problem to solution to measurable return. -->
+    <!-- Visualization & Content Choices:
+        - Hero Section: Goal is to immediately state the value proposition. A bold, text-based headline summarizes the ROI case.
+        - The Challenge: Goal is to frame problems as quantifiable costs. Large, bold numbers are used to highlight business pain points (e.g., lost sales, higher costs) that justify investment.
+        - Solutions: Goal is to link each solution directly to a financial metric. The interactive toggle now highlights the benefit of a reduced sales cycle, while the bar chart explicitly shows "cost reduction" and "time savings." The donut charts are repurposed to illustrate specific operational efficiency gains, which translate to savings.
+        - Quantified Impact: Goal is to provide a compelling, high-level summary of the total projected ROI. A horizontal bar chart visualizes key performance indicators (KPIs) as percentages of improvement, making the overall impact easy to digest.
+        - Justification: All presentation choices are made to be concise, data-driven, and focused on business value, which is critical for a leadership audience.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcfbf8;
+            color: #2d3748;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #007a7a;
+        }
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: #4a5568;
+            max-width: 800px;
+            margin: 0 auto 3rem auto;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            padding: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #007a7a, #004d4d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .kpi-value {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .kpi-label {
+            font-size: 1rem;
+            color: #718096;
+        }
+        .dot {
+            transition: transform 0.3s ease;
+        }
+        input:checked + .block .dot {
+            transform: translateX(1.5rem);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold">
+                <span class="text-gray-800">Feroxus</span> <span class="text-[#007a7a]">&</span> <span class="text-gray-600">Lucas-TVS</span>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#challenge" class="nav-link text-gray-600 font-medium">The Cost of Inaction</a>
+                <a href="#solutions" class="nav-link text-gray-600 font-medium">Our ROI Drivers</a>
+                <a href="#impact" class="nav-link text-gray-600 font-medium">Quantified ROI</a>
+                <a href="#next-steps" class="nav-link text-gray-600 font-medium">Pilot Projects</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-gray-700 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#challenge" class="block py-2 px-6 text-sm text-gray-700">The Cost of Inaction</a>
+            <a href="#solutions" class="block py-2 px-6 text-sm text-gray-700">Our ROI Drivers</a>
+            <a href="#impact" class="block py-2 px-6 text-sm text-gray-700">Quantified ROI</a>
+            <a href="#next-steps" class="block py-2 px-6 text-sm text-gray-700">Pilot Projects</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="py-20 md:py-32 bg-white">
+            <div class="container mx-auto px-6 text-center">
+                <h1 class="text-4xl md:text-6xl font-bold text-gray-800 leading-tight mb-4">
+                    The ROI Case: Driving Profitability with Digital Transformation
+                </h1>
+                <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+                    A strategic partnership to deliver measurable financial returns for Lucas-TVS by optimizing B2B sales, accelerating R&D, and reducing operational costs with Feroxus's advanced digital solutions.
+                </p>
+                <a href="#solutions" class="bg-[#007a7a] text-white font-bold py-3 px-8 rounded-full hover:bg-[#005c5c] transition duration-300">See the ROI Drivers</a>
+            </div>
+        </section>
+
+        <section id="challenge" class="py-20">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="section-title">The Cost of Inaction</h2>
+                <p class="section-subtitle">
+                    Failing to adapt to the digital imperative can lead to direct financial losses and increased business risk. This section outlines the quantifiable costs of outdated methods.
+                </p>
+                <div class="grid md:grid-cols-3 gap-8 text-center">
+                    <div class="card">
+                        <p class="kpi-value gradient-text">30%+</p>
+                        <p class="kpi-label">Longer Sales Cycles</p>
+                        <p class="text-gray-600 mt-2">Static content fails to engage, leading to protracted sales cycles and a higher cost of client acquisition.</p>
+                    </div>
+                    <div class="card">
+                        <p class="kpi-value gradient-text">50%</p>
+                        <p class="kpi-label">Increased R&D Cost & Risk</p>
+                        <p class="text-gray-600 mt-2">Physical prototyping is expensive and slow, creating higher costs and a risk of being outpaced by competition.</p>
+                    </div>
+                    <div class="card">
+                        <p class="kpi-value gradient-text">25%</p>
+                        <p class="kpi-label">Higher Operational Costs</p>
+                        <p class="text-gray-600 mt-2">Manual processes and reactive maintenance lead to significant hidden costs from downtime, defects, and re-training.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="solutions" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center">
+                    <h2 class="section-title">Our Solutions: Drivers of ROI</h2>
+                    <p class="section-subtitle">
+                        Feroxus's solutions are engineered to directly address these costs, delivering a clear return on investment.
+                    </p>
+                </div>
+
+                <div class="space-y-24">
+                    <div class="card grid md:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">1. Boost Sales & Client Acquisition</h3>
+                            <p class="text-gray-600 mb-6">Our hyper-realistic 3D models and interactive experiences reduce the "explainability gap," leading to faster client buy-in and a significant reduction in your sales cycle.</p>
+                            <div class="flex items-center space-x-4 mb-6">
+                                <span class="text-gray-600">Costly & Slow</span>
+                                <label for="toggle" class="flex items-center cursor-pointer">
+                                    <div class="relative">
+                                        <input type="checkbox" id="toggle" class="sr-only">
+                                        <div class="block bg-gray-200 w-14 h-8 rounded-full"></div>
+                                        <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                                    </div>
+                                </label>
+                                <span class="font-bold text-[#007a7a]">Efficient & Fast</span>
+                            </div>
+                            <p id="toggle-text" class="text-sm text-gray-500">Currently showing the traditional sales approach. Toggle to see the Feroxus ROI-driven approach.</p>
+                        </div>
+                        <div class="h-80 rounded-lg flex items-center justify-center bg-gray-100 p-4">
+                            <div id="view-before" class="w-full h-full">
+                                <img src="https://placehold.co/600x400/e2e8f0/4a5568?text=Static+EV+Motor+Blueprint" alt="Static Blueprint" class="w-full h-full object-contain rounded-md">
+                            </div>
+                            <div id="view-after" class="w-full h-full hidden">
+                                <!-- Loading indicator -->
+                                <div id="canvas-loading" class="w-full h-full flex items-center justify-center text-gray-500">
+                                    <div class="animate-spin rounded-full h-8 w-8 border-4 border-t-4 border-gray-300 border-t-[#007a7a]"></div>
+                                </div>
+                                <canvas id="product-canvas" class="w-full h-full hidden"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card grid md:grid-cols-2 gap-12 items-center">
+                        <div class="md:order-2">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">2. Lower R&D Costs & Accelerate Time-to-Market</h3>
+                            <p class="text-gray-600 mb-6">By using AI and VR to replace physical prototyping, we can cut R&D cycles by up to 50%, directly reducing costs and enabling you to capture new market opportunities faster.</p>
+                            <div class="chart-container">
+                                <canvas id="rd-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="md:order-1">
+                            <h4 class="font-bold text-lg mb-4 text-center">Development Workflow Transformation</h4>
+                            <div class="flex justify-between text-xs text-gray-500 px-2">
+                                <span>High Cost & Time</span>
+                                <span>Low Cost & Time</span>
+                            </div>
+                            <div class="relative w-full h-2 bg-gray-200 rounded-full mb-8">
+                                <div class="absolute top-0 left-0 h-2 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full w-1/2"></div>
+                            </div>
+                            <div class="space-y-4 text-sm">
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-6 h-6 rounded-full bg-red-500 flex-shrink-0 mt-1"></div>
+                                    <div><span class="font-bold">Current:</span> Multiple physical prototypes, sequential testing, long feedback loops.</div>
+                                </div>
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-6 h-6 rounded-full bg-green-500 flex-shrink-0 mt-1"></div>
+                                    <div><span class="font-bold">Enhanced:</span> AI-driven simulation, VR prototyping, parallel virtual testing, rapid iteration.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">3. Optimize Manufacturing for Cost & Quality</h3>
+                        <p class="text-gray-600 mb-12 max-w-3xl mx-auto text-center">Our AI and AR solutions improve your bottom line by reducing costly downtime, minimizing defects, and accelerating the skills development of your workforce.</p>
+                        <div class="grid md:grid-cols-3 gap-8">
+                            <div class="text-center">
+                                <h4 class="font-semibold text-lg mb-2">Reduce Downtime Costs</h4>
+                                <div class="chart-container !h-64 !max-h-64">
+                                    <canvas id="maintenance-chart"></canvas>
+                                </div>
+                                <p class="text-gray-600 mt-4 text-sm">AI-driven predictive maintenance shifts from reactive repairs to proactive savings.</p>
+                            </div>
+                            <div class="text-center">
+                                <h4 class="font-semibold text-lg mb-2">Lower Defect & Rework Costs</h4>
+                                <div class="chart-container !h-64 !max-h-64">
+                                    <canvas id="quality-chart"></canvas>
+                                </div>
+                                <p class="text-gray-600 mt-4 text-sm">Real-time quality control with AI automation reduces waste and improves product integrity.</p>
+                            </div>
+                            <div class="text-center">
+                                <h4 class="font-semibold text-lg mb-2">Accelerate Training & Productivity</h4>
+                                <div class="chart-container !h-64 !max-h-64">
+                                    <canvas id="training-chart"></canvas>
+                                </div>
+                                <p class="text-gray-600 mt-4 text-sm">AR-guided training shortens the learning curve and boosts workforce productivity from day one.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact" class="py-20">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="section-title">The ROI Case: A Projected Impact</h2>
+                <p class="section-subtitle">
+                    Our solutions deliver measurable results that directly impact your key financial and operational metrics. This chart summarizes the projected improvements.
+                </p>
+                <div class="card max-w-4xl mx-auto">
+                    <div class="chart-container !h-96 !max-h-96">
+                        <canvas id="impact-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="next-steps" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center">
+                    <h2 class="section-title">Building the ROI Case: Phased Implementation</h2>
+                    <p class="section-subtitle">
+                        To prove the ROI, we recommend starting with a low-risk, high-impact pilot project.
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="card text-center">
+                        <div class="mx-auto w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center mb-4 text-3xl">🤝</div>
+                        <h4 class="font-bold text-lg mb-2">Sales Cycle Reduction Pilot</h4>
+                        <p class="text-sm text-gray-600">Deploy an interactive 3D product experience for one key EV component and measure the time-to-close with a strategic client.</p>
+                    </div>
+                    <div class="card text-center">
+                        <div class="mx-auto w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center mb-4 text-3xl">🔬</div>
+                        <h4 class="font-bold text-lg mb-2">R&D Cost Reduction Pilot</h4>
+                        <p class="text-sm text-gray-600">Implement AI simulation for a single R&D phase and quantify the direct cost savings on physical prototyping.</p>
+                    </div>
+                    <div class="card text-center">
+                        <div class="mx-auto w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center mb-4 text-3xl">⚙️</div>
+                        <h4 class="font-bold text-lg mb-2">Downtime Cost Reduction Pilot</h4>
+                        <p class="text-sm text-gray-600">Deploy AI monitoring on one critical machine and measure the reduction in unplanned downtime events.</p>
+                    </div>
+                    <div class="card text-center">
+                        <div class="mx-auto w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center mb-4 text-3xl">🎓</div>
+                        <h4 class="font-bold text-lg mb-2">Training Cost Reduction Pilot</h4>
+                        <p class="text-sm text-gray-600">Create an AR-guided training module for one complex EV assembly task and measure the time to proficiency.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-6 text-center">
+            <h3 class="text-3xl font-bold mb-4">Let's Build the Future, Together.</h3>
+            <p class="text-gray-400 mb-8">Contact us to schedule a detailed workshop on these pilot projects.</p>
+            <p class="font-bold">Muralidharan Dhanushkodi (VP - International Marketing)</p>
+            <p class="text-gray-400">balan.tv@lucastvs.co.in | +91 98402 89776</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- Mobile Menu Toggle ---
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // --- 3D Product Visualization with three.js ---
+            const toggle = document.getElementById('toggle');
+            const viewBefore = document.getElementById('view-before');
+            const viewAfter = document.getElementById('view-after');
+            const toggleText = document.getElementById('toggle-text');
+            const canvas = document.getElementById('product-canvas');
+            const loadingIndicator = document.getElementById('canvas-loading');
+            let renderer, scene, camera, cube;
+            let animationFrameId;
+
+            // This function sets up the three.js scene and is called only once
+            function init3D() {
+                // Remove the loading indicator
+                loadingIndicator.classList.add('hidden');
+                canvas.classList.remove('hidden');
+
+                // Set up the scene, camera, and renderer
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+                renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true }); // Alpha true for transparent background
+                renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+
+                // Create a cube geometry and material
+                const geometry = new THREE.BoxGeometry(1, 1, 1);
+                // Use a standard material for better lighting
+                const material = new THREE.MeshStandardMaterial({
+                    color: 0x007a7a,
+                    roughness: 0.5,
+                    metalness: 0.8
+                });
+                cube = new THREE.Mesh(geometry, material);
+                scene.add(cube);
+
+                // Add some lighting to make the 3D object visible and give it depth
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+                scene.add(ambientLight);
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(5, 5, 5);
+                scene.add(directionalLight);
+
+                camera.position.z = 2;
+                
+                // Add window resize listener
+                window.addEventListener('resize', onWindowResize, false);
+                
+                animate(); // Start the animation loop
+            }
+
+            // Handles canvas resizing for responsiveness
+            function onWindowResize() {
+                if (!camera || !renderer) return;
+                camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+            }
+
+            // The animation loop
+            function animate() {
+                animationFrameId = requestAnimationFrame(animate);
+                if (cube) {
+                    cube.rotation.x += 0.005;
+                    cube.rotation.y += 0.005;
+                }
+                renderer.render(scene, camera);
+            }
+            
+            // Function to stop the three.js animation
+            function stopAnimation() {
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+            }
+
+            // Toggle logic for the view
+            toggle.addEventListener('change', function() {
+                viewBefore.classList.toggle('hidden');
+                viewAfter.classList.toggle('hidden');
+                if (this.checked) {
+                    toggleText.textContent = "Now showing the efficient, ROI-driven approach with a faster sales cycle.";
+                    if (!renderer) {
+                        // Show loading indicator and then initialize 3D scene
+                        loadingIndicator.classList.remove('hidden');
+                        setTimeout(init3D, 500); // Simulate a small loading delay
+                    } else {
+                        animate(); // Resume animation if already initialized
+                    }
+                } else {
+                    toggleText.textContent = "Currently showing the costly, traditional sales approach. Toggle to see the Feroxus difference.";
+                    stopAnimation();
+                }
+            });
+
+            // --- Chart.js Initializations ---
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: '#1a202c',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#e2e8f0' },
+                        ticks: { color: '#4a5568' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#4a5568' }
+                    }
+                }
+            };
+
+            const donutChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
+                }
+            };
+            
+            // Chart 1: R&D Chart
+            new Chart(document.getElementById('rd-chart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Current R&D', 'Feroxus-Enhanced R&D'],
+                    datasets: [{
+                        label: 'Time-to-Market (Months)',
+                        data: [18, 9],
+                        backgroundColor: ['#cbd5e1', '#007a7a'],
+                        borderColor: ['#94a3b8', '#004d4d'],
+                        borderWidth: 1
+                    }]
+                },
+                options: chartOptions
+            });
+
+            // Chart 2: Maintenance Chart (Simplified donut)
+            new Chart(document.getElementById('maintenance-chart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Saved Time', 'Remaining Time'],
+                    datasets: [{
+                        data: [75, 25],
+                        backgroundColor: ['#007a7a', '#e2e8f0'],
+                        hoverBackgroundColor: ['#005c5c', '#cbd5e1'],
+                        borderWidth: 0
+                    }]
+                },
+                options: donutChartOptions
+            });
+
+            // Chart 3: Quality Chart (Simplified donut)
+            new Chart(document.getElementById('quality-chart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Reduced Defects', 'Remaining Defects'],
+                    datasets: [{
+                        data: [80, 20],
+                        backgroundColor: ['#007a7a', '#e2e8f0'],
+                        hoverBackgroundColor: ['#005c5c', '#cbd5e1'],
+                        borderWidth: 0
+                    }]
+                },
+                options: donutChartOptions
+            });
+            
+            // Chart 4: Training Chart (Simplified donut)
+            new Chart(document.getElementById('training-chart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Error Reduction', 'Base Error Rate'],
+                    datasets: [{
+                        data: [80, 20],
+                        backgroundColor: ['#007a7a', '#e2e8f0'],
+                        hoverBackgroundColor: ['#005c5c', '#cbd5e1'],
+                        borderWidth: 0
+                    }]
+                },
+                options: donutChartOptions
+            });
+
+            // Chart 5: Main Impact Chart
+            new Chart(document.getElementById('impact-chart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Sales Cycle Reduction', 'R&D Cost Reduction', 'Downtime Reduction', 'Defect Rate Reduction'],
+                    datasets: [{
+                        label: 'Projected Improvement (%)',
+                        data: [30, 40, 75, 80],
+                        backgroundColor: [
+                            'rgba(0, 122, 122, 0.7)',
+                            'rgba(0, 102, 102, 0.7)',
+                            'rgba(0, 82, 82, 0.7)',
+                            'rgba(0, 61, 61, 0.7)'
+                        ],
+                        borderColor: [
+                            '#007a7a',
+                            '#006666',
+                            '#005252',
+                            '#003d3d'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: '#e2e8f0' },
+                            ticks: { color: '#4a5568', callback: function(value) { return value + '%' } }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#4a5568' }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
